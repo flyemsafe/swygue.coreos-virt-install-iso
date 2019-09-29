@@ -1,6 +1,6 @@
 - name: get all running vms
   virt:
-    command: "list vms"
+    command: list_vms
   register: vms
 
 - name: deploy virt-install template
