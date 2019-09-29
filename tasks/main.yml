@@ -1,0 +1,52 @@
+---
+# tasks file for swygue.coreos-virt-install-iso#!/usr/bin/env ansible-playbook
+---
+- name: include podman webserver checks
+  include: stop_podman_webserver.yml
+
+- name: ensure required directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+  with_items:
+    - "{{ coreos_iso_extract_dir }}"
+    - "{{ downloaded_files_dir }}"
+    - "{{ ignition_files_dir }}"
+
+- name: download required files from openshift mirror
+  get_url:
+    url: "{{ openshift_mirror }}/{{ item }}"
+    dest: "{{ downloaded_files_dir }}/{{ item }}"
+  with_items:
+    - "{{ coreos_metal_bios }}"
+    - "{{ coreos_installer_iso }}"
+    - "{{ coreos_tmp_dir }}"
+
+- name: copy over ignition files to webserver pub directory
+  copy:
+    src: "{{ ignition_files_dir }}/{{ item }}.ign"
+    dest: "{{ downloaded_files_dir }}/{{ item }}.ign"
+  with_items:
+    - master
+    - worker
+    - bootstrap
+  tags: ignition
+
+- name: extract kernel and ramdisk from coreos cd
+  iso_extract:
+    image: "{{ downloaded_files_dir }}/{{ coreos_installer_iso }}"
+    dest: /tmp/coreos/
+    files:
+      - images/efiboot.img
+      - images/initramfs.img
+      - images/vmlinuz
+  become: yes
+
+- name: copy treeinfo to /tmp/coreos
+  copy:
+    src: files/treeinfo
+    dest: /tmp/coreos/.treeinfo
+
+- name: include podman start/deploy tasks
+  include: start_podman_webserver.yml
