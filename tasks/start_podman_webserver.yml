@@ -1,6 +1,5 @@
 ---
 # tasks file for swygue.coreos-virt-install-iso#!/usr/bin/env ansible-playbook
----
 - name: setup configuration files for podman deployment if not deployed
   copy:
   src: files/webserver

@@ -1,6 +1,5 @@
 ---
 # tasks file for swygue.coreos-virt-install-iso#!/usr/bin/env ansible-playbook
----
 - name: check if podman webserver is running
   shell: podman ps -a | grep ignwebserver | grep -v Exited
   become: yes
