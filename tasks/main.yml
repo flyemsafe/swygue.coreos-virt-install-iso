@@ -20,7 +20,6 @@
   with_items:
     - "{{ coreos_metal_bios }}"
     - "{{ coreos_installer_iso }}"
-    - "{{ coreos_tmp_dir }}"
 
 - name: copy over ignition files to webserver pub directory
   copy:
