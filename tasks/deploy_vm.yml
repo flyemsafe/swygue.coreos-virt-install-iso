@@ -1,0 +1,15 @@
+- name: deploy virt-install template
+  template:
+    src: virt-install-coreos.j2
+    dest: "{{ coreos_iso_extract_dir }}/virt_install.sh"
+    mode: "u=rwx,g=rx,o=rx"
+    owner: "{{ admin_user }}"
+
+- name: deploy vm instance {{ vm_instance_name }}
+  shell:  {{ coreos_iso_extract_dir }}/virt_install.sh
+  become: true
+  register: deploy_vm_instance
+  until: deploy_vm_instance.rc == 0
+  delay: 1
+  retries: 5
+  
