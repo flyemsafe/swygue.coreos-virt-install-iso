@@ -1,12 +1,20 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+This role does the following:
+
+ * Downloads these coreos files:
+     - metal-bios.raw.gz
+     - *.iso
+ * Copy over your ignition files for worker, bootstrap and master to the directory to be exported as a podman volume
+ * Extract the coreos iso and copy the efiboot.img, initramfs.img and vmlinuz to /tmp/coreos
+ * copy over treeinfo to /tmp/coreos
+ * build a podman httpd container and start it
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role requires you ignition files. It's meant to be used with https://github.com/RedHat-EMEA-SSA-Team/hetzner-ocp4.
 
 Role Variables
 --------------
@@ -21,7 +29,7 @@ downloaded_files_dir: downloaded_files_and_podman_volume
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+none
 
 Example Playbook
 ----------------
