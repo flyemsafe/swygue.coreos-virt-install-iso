@@ -8,4 +8,12 @@ coreos_tmp_dir: /tmp/build_coreos_iso
 downloaded_files_dir: ""
 ignition_files_dir: ""
 openshift_mirror: http://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest
-ssh_public_key_location: ""
+
+kvm_host_ip: ""
+libvirt_network_name: ""
+vm_instance_name: ""
+coreos_inst_install_dev: vda
+coreos_inst_image_url: http://{{ kvm_host_ip }}:8080/pub/{{ coreos_metal_bios }}
+coreos_inst_ignition_url: http://{{ kvm_host_ip }}:8080/pub/{{ vm_role }}.ign
+vm_instance_disk: "/var/lib/libvirt/images/{{ vm_instance_name }}.qcow2"
+virt_install_args: "coreos.inst=yes coreos.inst.install_dev={{ coreos_inst_install_dev }} coreos.inst.image_url={{ coreos_inst_image_url }} coreos.inst.ignition_url={{ coreos_inst_ignition_url }} ip=dhcp rd.neednet=1"
