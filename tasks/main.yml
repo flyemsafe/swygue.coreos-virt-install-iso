@@ -1,6 +1,5 @@
 ---
 # tasks file for swygue.coreos-virt-install-iso#!/usr/bin/env ansible-playbook
----
 - name: include podman webserver checks
   include: stop_podman_webserver.yml
 
