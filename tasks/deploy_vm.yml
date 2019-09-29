@@ -6,7 +6,7 @@
     owner: "{{ admin_user }}"
 
 - name: deploy vm instance {{ vm_instance_name }}
-  shell:  {{ coreos_iso_extract_dir }}/virt_install.sh
+  shell:  "{{ coreos_iso_extract_dir }}/virt_install.sh"
   become: true
   register: deploy_vm_instance
   until: deploy_vm_instance.rc == 0
