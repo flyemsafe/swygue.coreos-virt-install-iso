@@ -1,15 +1,22 @@
+- name: get all running vms
+  virt:
+    command: "list vms"
+  register: vms
+
 - name: deploy virt-install template
   template:
     src: virt-install-coreos.j2
-    dest: "{{ coreos_iso_extract_dir }}/virt_install.sh"
+    dest: "{{ coreos_iso_extract_dir }}/{{ vm_instance_name }}.sh"
     mode: "u=rwx,g=rx,o=rx"
     owner: "{{ admin_user }}"
+  when: vm_instance_name not in vms.list_vms
 
 - name: deploy vm instance {{ vm_instance_name }}
-  shell:  "{{ coreos_iso_extract_dir }}/virt_install.sh"
+  shell:  "{{ coreos_iso_extract_dir }}/{{ vm_instance_name }}.sh"
   become: true
   register: deploy_vm_instance
   until: deploy_vm_instance.rc == 0
   delay: 1
   retries: 5
+  when: vm_instance_name not in vms.list_vms
   
