@@ -7,6 +7,6 @@ args+='coreos.inst.ignition_url=http://172.24.24.3:8080/pub/bootstrap.ign '
 args+='ip=dhcp '
 args+='rd.neednet=1'
 
-sudo virt-install --location /var/lib/podcans/httpd/pub/rhcos-42.80.20190828.2-installer.iso --extra-args="${args}" --network network=ocp4 --name ocp4-bootstrap --memory 8096 --disk /var/lib/libvirt/images/ocp4-bootstrap.qcow2
+virt-install --location {{ downloaded_files_dir }}/{{ coreos_installer_iso }} --extra-args="${args}" --network network={{ libvirt_network_name }} --name {{ vm_instance_name }} --memory {{ vm_memory_size }} --disk {{ vm_instance_disk }}
 
-exit 0
+exit $?
