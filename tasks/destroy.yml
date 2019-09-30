@@ -2,19 +2,23 @@
 - name: checking if podman containers is running
   shell: "podman container list -a --format {% raw %} 'table {{.Names}} {{.ID}}' {% endraw %}|awk '/{{ podman_webserver }}/ {print $2}'"
   register: running_containers
+  become: yes
 
 - name: stop running containers
   shell: "podman stop {{ running_containers.stdout }}"
   when: running_containers.stdout != ""
+  become: yes
 
 - name: delete {{ podman_webserver }} container
   shell: "podman rm {{ running_containers.stdout }}"
   when: running_containers.stdout != ""
+  become: yes
 
 - name: ensure created directories are removed
   file:
     path: "{{ item }}"
     state: absent
+  become: yes
   with_items:
     - "{{ coreos_iso_extract_dir }}"
     - "{{ downloaded_files_dir }}"
