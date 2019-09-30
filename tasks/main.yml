@@ -29,7 +29,6 @@
     - master
     - worker
     - bootstrap
-  tags: ignition
 
 - name: extract kernel and ramdisk from coreos cd
   iso_extract:
