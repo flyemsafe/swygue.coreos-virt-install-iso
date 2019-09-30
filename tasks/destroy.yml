@@ -1,0 +1,13 @@
+---
+- name: checking if podman containers is running
+  shell: "podman container list -a --format {% raw %} 'table {{.Names}} {{.ID}}' {% endraw %}|awk '/{{ podman_webserver }}/ {print $2}'"
+  register: running_containers
+
+- name: stop running containers
+  shell: "podman stop {{ running_containers.stdout }}"
+  when: running_containers.stdout != ""
+
+- name: delete {{ podman_webserver }} container
+  shell: "podman rm {{ running_containers.stdout }}"
+  when: running_containers.stdout != ""
+
