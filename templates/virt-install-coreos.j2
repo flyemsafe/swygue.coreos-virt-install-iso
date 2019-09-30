@@ -7,6 +7,6 @@ args+='coreos.inst.ignition_url=http://172.24.24.3:8080/pub/bootstrap.ign '
 args+='ip=dhcp '
 args+='rd.neednet=1'
 
-virt-install --location {{ coreos_iso_extract_dir }} --extra-args="${args}" --network network={{ libvirt_network_name }} --name {{ vm_instance_name }} --memory {{ vm_memory_size }} --disk {{ vm_instance_disk }}
+virt-install --location {{ coreos_iso_extract_dir }} --extra-args="${args}" --network network={{ libvirt_network_name }},mac={{ vm_mac_address }},model=virtio --name {{ vm_instance_name }} --memory {{ vm_memory_size }} --disk {{ vm_instance_disk }} 
 
 exit $?
