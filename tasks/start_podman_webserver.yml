@@ -16,14 +16,14 @@
   when: webserver_status.rc != 0 and webserver_deployed.rc != 0
 
 - name: run podman webserver if not deployed
-  command: podman run -d -v {{ downloaded_files_dir}}:/var/www/html/pub:Z -p 8080:80 --name=ignwebserver webserver
+  command: podman run -d -v {{ downloaded_files_dir}}:/var/www/html/pub:Z -p 8080:80 --name={{ podman_webserver }} webserver
   become: yes
   args:
     warn: false
   when: webserver_status.rc != 0 and webserver_deployed.rc != 0
 
 - name: start stopped podman webserver
-  command: podman start ignwebserver
+  command: podman start {{ podman_webserver }}
   become: yes
   args:
     warn: false

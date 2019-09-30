@@ -9,6 +9,7 @@ downloaded_files_dir: ""
 ignition_files_dir: ""
 openshift_mirror: http://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest
 
+podman_webserver: ignwebserver
 kvm_host_ip: ""
 libvirt_network_name: ""
 vm_instance_name: ""
