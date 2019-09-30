@@ -11,3 +11,11 @@
   shell: "podman rm {{ running_containers.stdout }}"
   when: running_containers.stdout != ""
 
+- name: ensure created directories are removed
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ coreos_iso_extract_dir }}"
+    - "{{ downloaded_files_dir }}"
+    - "{{ ignition_files_dir }}"
