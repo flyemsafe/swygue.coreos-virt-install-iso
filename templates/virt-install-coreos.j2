@@ -2,8 +2,8 @@
 
 args='coreos.inst=yes '
 args+='coreos.inst.install_dev=vda '
-args+='coreos.inst.image_url=http://172.24.24.3:8080/pub/rhcos-42.80.20190828.2-metal-bios.raw.gz '
-args+='coreos.inst.ignition_url=http://172.24.24.3:8080/pub/bootstrap.ign '
+args+='coreos.inst.image_url=http://172.24.24.3:8080/pub/{{ coreos_metal_bios }} '
+args+='coreos.inst.ignition_url=http://172.24.24.3:8080/pub/{{ vm_role }}.ign '
 args+='ip=dhcp '
 args+='rd.neednet=1'
 

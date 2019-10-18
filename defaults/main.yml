@@ -1,13 +1,14 @@
 ---
 # defaults file for swygue.coreos-virt-install-isocluster_name: ocp4
 admin_user: ""
-coreos_installer_iso: rhcos-42.80.20190828.2-installer.iso
 coreos_iso_extract_dir: /tmp/coreos # do not change this, iso_extract role fails when using variable so this is hardcoded for this module
-coreos_metal_bios: rhcos-42.80.20190828.2-metal-bios.raw.gz
 coreos_tmp_dir: /tmp/build_coreos_iso
 downloaded_files_dir: ""
 ignition_files_dir: ""
-openshift_mirror: http://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest
+
+openshift_mirror: http://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest
+coreos_installer_iso: rhcos-4.2.0-x86_64-installer.iso
+coreos_metal_bios: rhcos-4.2.0-x86_64-metal-bios.raw.gz
 
 podman_webserver: ignwebserver
 kvm_host_ip: ""

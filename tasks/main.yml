@@ -13,7 +13,7 @@
     - "{{ downloaded_files_dir }}"
     - "{{ ignition_files_dir }}"
 
-- name: download required files from openshift mirror
+- name: download required files from {{ openshift_mirror }}/{{ coreos_installer_iso }}
   get_url:
     url: "{{ openshift_mirror }}/{{ item }}"
     dest: "{{ downloaded_files_dir }}/{{ item }}"
