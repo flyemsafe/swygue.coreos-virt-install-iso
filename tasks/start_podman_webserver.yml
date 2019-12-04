@@ -1,30 +1,22 @@
 ---
-# tasks file for swygue.coreos-virt-install-iso#!/usr/bin/env ansible-playbook
-- name: setup configuration files for podman deployment if not deployed
-  copy:
-    src: files/webserver
-    dest: "{{ coreos_tmp_dir }}"
-  become: yes
-  when: webserver_status.rc != 0 and webserver_deployed.rc != 0
-
 - name: build podman webserver if not deployed
   command: podman build --format=docker -t webserver .
   become: yes
   args:
     chdir: "{{ coreos_tmp_dir }}/webserver"
     warn: false
-  when: webserver_status.rc != 0 and webserver_deployed.rc != 0
+  when: webserver_exist.rc != 0
 
-- name: run podman webserver if not deployed
-  command: podman run -d -v {{ downloaded_files_dir}}:/var/www/html/pub:Z -p 8080:80 --name={{ podman_webserver }} webserver
+- name: create podman webserver 
+  command: podman create -v {{ webserver_directory }}:/var/www/html/pub:Z -p 8080:80 --name={{ podman_webserver }} webserver
   become: yes
   args:
     warn: false
-  when: webserver_status.rc != 0 and webserver_deployed.rc != 0
+  when: webserver_exist.rc != 0
 
 - name: start stopped podman webserver
   command: podman start {{ podman_webserver }}
   become: yes
   args:
     warn: false
-  when: webserver_deployed.rc == 0
+  when: webserver_running.rc != 0

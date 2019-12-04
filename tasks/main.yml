@@ -1,49 +1,23 @@
 ---
 # tasks file for swygue.coreos-virt-install-iso#!/usr/bin/env ansible-playbook
-- name: include podman webserver checks
-  include: stop_podman_webserver.yml
+- name: setup files to be servered up via webserver for ignition
+  include: setup_httpd_files.yml
 
-- name: ensure required directories exist
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ admin_user }}"
-  with_items:
-    - "{{ coreos_iso_extract_dir }}"
-    - "{{ downloaded_files_dir }}"
-    - "{{ ignition_files_dir }}"
-
-- name: download required files from {{ openshift_mirror }}/{{ coreos_installer_iso }}
-  get_url:
-    url: "{{ openshift_mirror }}/{{ item }}"
-    dest: "{{ downloaded_files_dir }}/{{ item }}"
-  with_items:
-    - "{{ coreos_metal_bios }}"
-    - "{{ coreos_installer_iso }}"
-
-- name: copy over ignition files to webserver pub directory
-  copy:
-    src: "{{ ignition_files_dir }}/{{ item }}.ign"
-    dest: "{{ downloaded_files_dir }}/{{ item }}.ign"
-  with_items:
-    - master
-    - worker
-    - bootstrap
-
-- name: extract kernel and ramdisk from coreos cd
-  iso_extract:
-    image: "{{ downloaded_files_dir }}/{{ coreos_installer_iso }}"
-    dest: /tmp/coreos/
-    files:
-      - images/efiboot.img
-      - images/initramfs.img
-      - images/vmlinuz
+- name: check if podman webserver is exists
+  shell: podman ps -a | grep {{ podman_webserver }}
   become: yes
+  failed_when: false
+  changed_when: webserver_exist.rc != 0
+  register: webserver_exist
 
-- name: copy treeinfo to /tmp/coreos
-  copy:
-    src: files/treeinfo
-    dest: /tmp/coreos/.treeinfo
+- name: debug webserver_exist
+  debug: var=webserver_exist
+
+- name: check if podman webserver is Running 
+  shell: podman inspect {{ podman_webserver }} | grep Running |grep true
+  become: yes
+  failed_when: false
+  register: webserver_running
 
 - name: include podman start/deploy tasks
   include: start_podman_webserver.yml

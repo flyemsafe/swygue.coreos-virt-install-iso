@@ -1,21 +1,52 @@
 ---
 # defaults file for swygue.coreos-virt-install-isocluster_name: ocp4
+ocp4_image_version: 4.2.0
+ocp4_dependencies_version: 4.2
+ocp4_release: 4.2.7
+ocp4_version: "{{ ocp4_release }}"
+ocp4_release_url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp4_release }}/"
+ocp4_client: "openshift-client-linux-{{ ocp4_version }}.tar.gz"
+ocp4_installer: "openshift-install-linux-{{ ocp4_version }}.tar.gz"
+
+
+project_dir: /tmp
+downloaded_files_dir: /tmp
 admin_user: ""
-coreos_iso_extract_dir: /tmp/coreos # do not change this, iso_extract role fails when using variable so this is hardcoded for this module
-coreos_tmp_dir: /tmp/build_coreos_iso
-downloaded_files_dir: ""
+coreos_installer_kernel: "rhcos-{{ ocp4_image_version }}-x86_64-installer-kernel"
+coreos_installer_initramfs: "rhcos-{{ ocp4_image_version }}-x86_64-installer-initramfs.img"
+coreos_iso_extract_dir: "{{ project_dir }}/rhcos-install/" # do not change this, iso_extract role fails when using variable so this is hardcoded for this module
+coreos_metal_bios: "rhcos-{{ ocp4_image_version }}-x86_64-metal-bios.raw.gz"
+coreos_tmp_dir: /tmp/build_coreos_container
 ignition_files_dir: ""
+dest_ignitions_web_directory: "{{ webserver_directory }}/{{ ocp4_dependencies_version }}/ignitions/"
 
-openshift_mirror: http://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest
-coreos_installer_iso: rhcos-4.2.0-x86_64-installer.iso
-coreos_metal_bios: rhcos-4.2.0-x86_64-metal-bios.raw.gz
-
-podman_webserver: ignwebserver
+podman_webserver: ocp4ignhttpd
+webserver_directory: /opt/qubinode_webserver
 kvm_host_ip: ""
 libvirt_network_name: ""
-vm_instance_name: ""
-coreos_inst_install_dev: vda
-coreos_inst_image_url: http://{{ kvm_host_ip }}:8080/pub/{{ coreos_metal_bios }}
-coreos_inst_ignition_url: http://{{ kvm_host_ip }}:8080/pub/{{ vm_role }}.ign
-vm_instance_disk: "/var/lib/libvirt/images/{{ vm_instance_name }}.qcow2"
-virt_install_args: "coreos.inst=yes coreos.inst.install_dev={{ coreos_inst_install_dev }} coreos.inst.image_url={{ coreos_inst_image_url }} coreos.inst.ignition_url={{ coreos_inst_ignition_url }} ip=dhcp rd.neednet=1"
+idm_server_ip: ""
+
+# VM variables
+kvm_host_libvirt_dir: /var/lib/libvirt/images
+nat_network_name: "ocp4"
+
+
+vm_type: bootstrap # Types: bootstrap, master, worker
+vm_name: bootstrap-0 # Types: bootstrap-0, master-0 <-> master-2, compute-0 <-> compute-1 +n
+coreos_vm_hd_size: 120G # Size of boot strap vm
+coreos_vm_memory_size: 16192
+coreos_host_ip: 192.168.50.100
+
+# Uncomment to deploy masters
+#vm_type: master # Types: bootstrap, master, worker
+#vm_name: master- # Types: bootstrap-0, master-0 <-> master-2, compute-0 <-> compute-1 +n
+#coreos_vm_hd_size: 120G # Size of boot strap vm
+#coreos_vm_memory_size: 16192
+#coreos_host_ip:
+
+# Uncomment to deploy compute nodes
+#vm_type: worker # Types: bootstrap, master, worker
+#vm_name: compute- # Types: bootstrap-0, master-0 <-> master-2, compute-0 <-> compute-1 +n
+#coreos_vm_hd_size: 120G # Size of boot strap vm
+#coreos_vm_memory_size: 16192
+#coreos_host_ip:

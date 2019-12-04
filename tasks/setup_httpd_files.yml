@@ -1,0 +1,153 @@
+---
+# tasks file for swygue.coreos-virt-install-iso#!/usr/bin/env ansible-playbook
+
+- name: check if "{{ coreos_iso_extract_dir }}" exists 
+  stat:
+    path: "{{ coreos_iso_extract_dir }}"
+  register: coreos_extract_dir
+
+- name: Recursively remove "{{ coreos_iso_extract_dir }}"
+  file:
+    path: "{{ coreos_iso_extract_dir }}"
+    state: absent
+  when: coreos_extract_dir.stat.exists == True
+
+- name: check if "{{ downloaded_files_dir }}/{{ coreos_installer_kernel }}" exists 
+  stat:
+    path: "{{ downloaded_files_dir }}/{{ coreos_installer_kernel }}"
+  register: coreos_kernel_file
+
+- name: check if "{{ downloaded_files_dir }}/{{ coreos_installer_initramfs }}" exists 
+  stat:
+    path: "{{ downloaded_files_dir }}/{{ coreos_installer_initramfs }}"
+  register: coreos_initramfs_file
+
+- name: Recursively remove "{{ downloaded_files_dir }}/{{ coreos_installer_kernel }}"
+  file:
+    path: "{{ downloaded_files_dir }}/{{ coreos_installer_kernel }}"
+    state: absent
+  when: coreos_kernel_file.stat.exists == True
+
+- name: Recursively remove "{{ downloaded_files_dir }}/{{ coreos_installer_initramfs }}"
+  file:
+    path: "{{ downloaded_files_dir }}/{{ coreos_installer_initramfs }}"
+    state: absent
+  when: coreos_initramfs_file.stat.exists == True
+
+- name: check if "{{ downloaded_files_dir }}/{{ coreos_metal_bios }}" exists 
+  stat:
+    path: "{{ downloaded_files_dir }}/{{ coreos_metal_bios }}"
+  register: coreos_metal_bios_file
+
+- name: Recursively remove "{{ downloaded_files_dir }}/{{ coreos_metal_bios }}"
+  file:
+    path: "{{ downloaded_files_dir }}/{{ coreos_metal_bios }}"
+    state: absent
+  when: coreos_metal_bios_file.stat.exists == True
+
+- name: Create "{{ coreos_iso_extract_dir }}" 
+  file:
+    path: "{{ coreos_iso_extract_dir }}"
+    state: directory
+    mode: '0755'
+  when: coreos_extract_dir.stat.exists == False
+
+- name: ensure required directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+  with_items:
+    - "{{ coreos_iso_extract_dir }}"
+    - "{{ ignition_files_dir }}"
+
+- name: download required files from openshift mirror
+  get_url:
+    url: "{{ openshift_mirror }}/{{ item }}"
+    dest: "{{ downloaded_files_dir }}/{{ item }}"
+  with_items:
+    - "{{ coreos_installer_kernel }}"
+    - "{{ coreos_installer_initramfs }}"
+    - "{{ coreos_metal_bios }}"   
+
+- name: copy over ignition files to webserver pub directory
+  copy:
+    src: "{{ ignition_files_dir }}/{{ item }}.ign"
+    dest: "{{ downloaded_files_dir }}/{{ item }}.ign"
+  with_items:
+    - master
+    - worker
+    - bootstrap
+
+- name: copy over kernel to install directory 
+  copy:
+    src: "{{ downloaded_files_dir }}/{{ coreos_installer_kernel }}"
+    dest: "{{ coreos_iso_extract_dir }}/vmlinuz"
+
+- name: copy over kernel to install directory 
+  copy:
+    src: "{{ downloaded_files_dir }}/{{ coreos_installer_initramfs }}"
+    dest: "{{ coreos_iso_extract_dir }}/initramfs.img"
+
+- name: copy treeinfo to /tmp/coreos
+  copy:
+    src: files/treeinfo
+    dest: "{{ coreos_iso_extract_dir }}/.treeinfo"
+
+- name: check if  Web Server Directory Exists
+  stat:
+    path: "{{ webserver_directory }}"
+  register: webserver_dir
+
+- name: Create a web directory for container data 
+  file:
+    path: "{{ webserver_directory }}"
+    state: directory
+    owner: "{{ admin_user }}"
+  when: webserver_dir.stat.exists == False
+
+- name: Create a "{{ ocp4_dependencies_version }}" directory
+  file:
+    path: "{{ webserver_directory }}/{{ ocp4_dependencies_version }}"
+    state: directory
+    owner: "{{ admin_user }}"
+
+- name: Create a images directory
+  file:
+    path: "{{ webserver_directory }}/{{ ocp4_dependencies_version }}/images"
+    state: directory
+    owner: "{{ admin_user }}"
+
+- name: Create ignition directory
+  file:
+    path: "{{ dest_ignitions_web_directory }}"
+    state: directory
+    owner: "{{ admin_user }}"
+
+- name: copy over ignition files to webserver directory
+  command: "cp {{ ignition_files_dir }}/{{ item }}.ign {{ dest_ignitions_web_directory }}/{{ item }}.ign"
+  with_items:
+  - master
+  - worker
+  - bootstrap
+
+- name: copy over kernel to web directory 
+  command: "cp {{ downloaded_files_dir }}/{{ coreos_installer_kernel }} {{ webserver_directory }}/{{ ocp4_dependencies_version }}/images/{{ coreos_installer_kernel }}"
+
+- name: copy over initramfs.img to web directory 
+  command: "cp {{ downloaded_files_dir }}/{{ coreos_installer_initramfs }} {{ webserver_directory }}/{{ ocp4_dependencies_version }}/images/{{ coreos_installer_initramfs }}"
+
+- name: copy over coreos_metal_bios to web directory 
+  command: "cp {{ downloaded_files_dir }}/{{ coreos_metal_bios }} {{ webserver_directory }}/{{ ocp4_dependencies_version }}/images/{{ coreos_metal_bios }}"
+
+- name: Apply new SELinux file context ignition directory
+  command: restorecon -RFv "{{ webserver_directory }}/{{ ocp4_dependencies_version }}/ignitions/"
+
+- name: Apply new SELinux file context to images directory
+  command: restorecon -RFv "{{ webserver_directory }}/{{ ocp4_dependencies_version }}/images/"
+
+- name: setup configuration files for podman deployment if not deployed
+  copy:
+    src: files/webserver
+    dest: "{{ coreos_tmp_dir }}"
+  become: yes
